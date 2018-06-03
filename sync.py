@@ -1,12 +1,12 @@
 import calendar
 import datetime
+import gkeepapi
 import json
 import random
 
-import gkeepapi
-
 # noinspection PyUnresolvedReferences
 from apiclient.discovery import build
+from collections import OrderedDict
 from httplib2 import Http
 from oauth2client import file, client, tools
 
@@ -14,7 +14,7 @@ from oauth2client import file, client, tools
 time setup
 """
 
-now, next_days, previous_days = datetime.datetime.now(), {}, []
+now, next_days, previous_days = datetime.datetime.now(), OrderedDict(), []
 
 
 def get_note_str(dt):
@@ -76,7 +76,7 @@ for event in events:
 get or add upcoming keep days
 """
 
-for i, next_day in enumerate(next_days):
+for i, next_day in enumerate(list(next_days)):
     glists = list(keep.find(func=lambda x: x.title == next_day))
 
     # check if note already exists
@@ -98,8 +98,8 @@ for i, next_day in enumerate(next_days):
 """
 remove old notes and add to backlog
 """
-
-backlog = list(keep.find(func=lambda x: x.title == "Backlog"))[0]
+backlog = list(keep.find(func=lambda x: x.title == "Backlog"))
+backlog = backlog[0] if len(backlog) > 0 else keep.createList("Backlog", [])
 
 for previous_day in previous_days:
     glists = list(keep.find(func=lambda x: x.title == previous_day))
